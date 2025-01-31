@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas
 
 st.set_page_config(layout="wide")
 
@@ -13,14 +14,15 @@ with col2:
     Hi, I'm Manuel Altermatt, a software engineer with a passion for data science and machine learning."""
     st.info(content)
 
-st.write(
-    """
-Here are some of the projects I have worked onlk jasdlk jaslk jasdlkj asdlökj alökdj alkösd. blablablas kdlsadlkj asdlkj asldkj aslkdj alkdsj salkdj l:
-"""
-)
 
-st.write("### Project 1")
-st.write("Description of project 1")
+st.write("Here are some of the projects I have worked on:")
+col3, col4 = st.columns(2)
 
-st.write("### Project 2")
-st.write("Description of project 2")
+df = pandas.read_csv("data.csv", sep=";")
+with col3:
+    for index, row in df[:10].iterrows():
+        st.header(row["title"])
+
+with col4:
+    for index, row in df[10:].iterrows():
+        st.header(row["title"])
