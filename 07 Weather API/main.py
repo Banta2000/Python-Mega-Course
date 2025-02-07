@@ -2,14 +2,20 @@ from flask import Flask, render_template
 
 app = Flask("Website")
 
+
 @app.route("/home")
 def home():
-    return render_template("tutorial.html")
+    return render_template("home.html")
 
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+@app.route("/v1/<station>/<date>")
+def about(station, date):
+    # df = pandas.read_csv("data.csv")
+    # temperature = df.station(date)
+    temperature = 23
+    res = {"station": station, "date": date, "temperature": temperature}
+    return res
 
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
