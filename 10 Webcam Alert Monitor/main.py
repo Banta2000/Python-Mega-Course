@@ -4,6 +4,7 @@ from emailing import send_email
 import streamlit as st
 import glob
 import os
+from threading import Thread
 
 
 def clean_folder():
@@ -26,7 +27,7 @@ if start:
 
     count = 1
 
-    while True:
+    while start:
         check, frame = video.read()
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -75,10 +76,12 @@ if start:
 
         # Check if object left the screen, if so send email
         if status_list[0] == 1 and status_list[1] == 0:
-            send_email(image_with_object)
-            clean_folder()
+            email_thread = Thread(target=send_email, args=(image_with_object,))
+            email_thread.daemon = True
+            clean_folder_thread = Thread(target=clean_folder)
+            clean_folder_thread.daemon = True
 
-        # cv2.imshow("Captured Frame", frame)
+            email_thread.start()
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         streamlit_image.image(rgb_frame)
@@ -87,4 +90,5 @@ if start:
         if key == ord("q"):
             break
 
+    clean_folder_thread.start()
     video.release()
