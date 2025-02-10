@@ -1,11 +1,13 @@
 import streamlit as st
-import numpy as np
 import plotly.express as px
+from backend import get_data
 
+# Title
 st.title("Weather Forecast for the Next Days")
 
-place = st.text_input("City:", value="Zurich")
 
+# Get the city name, the amount of days and the data to display
+place = st.text_input("City:", value="Zurich")
 num_days = st.slider(
     "Number of days for forecast:",
     min_value=1,
@@ -19,24 +21,28 @@ option = st.selectbox("Select data to view", ("Temperature", "Sky"))
 st.subheader(f"{option} for the next {num_days} days in {place}")
 
 
-def get_data(days):
-    dates = [f"2021-09-{day}" for day in range(1, days + 1)]
-    temperatures = [20 + np.random.randint(5, 10) for _ in range(days)]
-    return dates, temperatures
+try:
+    # Plot the data
+    dates, temperature, weather = get_data(num_days, place)
 
+    # Temperature Plot
+    if option == "Temperature":
+        labels = {"x": "Date", "y": "Temperature (°C)"}
+        figure = px.line(x=dates, y=temperature, labels=labels)
+        st.plotly_chart(figure)
 
-# Generate random data for the plot
-days = np.arange(1, num_days + 1)
-if option == "Temperature":
-    data = np.random.randint(low=-10, high=30, size=num_days)
-    fig = px.line(x=days, y=data, labels={"x": "Day", "y": "Temperature (°C)"}, title="Temperature Forecast")
-else:
-    sky_conditions = ["Sunny", "Cloudy", "Rainy", "Snowy"]
-    data = np.random.choice(sky_conditions, size=num_days)
-    fig = px.bar(x=days, y=data, labels={"x": "Day", "y": "Sky Condition"}, title="Sky Condition Forecast")
+    # Sky Plot
+    if option == "Sky":
+        weather_images = {
+            "Clear": "images/clear.png",
+            "Clouds": "images/clouds.png",
+            "Rain": "images/rain.png",
+            "Snow": "images/snow.png",
+        }
 
-dates, temperatures = get_data(num_days)
-labels = {"x": "Date", "y": "Temperature (°C)"}
-figure = px.line(x=dates, y=temperatures, labels=labels)
-
-st.plotly_chart(figure)
+        col = st.columns(len(dates))
+        for i, (date, condition) in enumerate(zip(dates, weather)):
+            with col[i]:
+                st.image(weather_images[condition], caption=date, width=100)
+except Exception as e:
+    st.error(f"Location does not exist")
